@@ -31,6 +31,13 @@ namespace Cube_4.Controllers
             return View();
         }
 
+        public IActionResult Edit()
+        {
+            ViewBag.Famille = new SelectList(context.Familles.ToList(), "Id", "Nom");
+            ViewBag.Fournisseur = new SelectList(context.Fournisseurs.ToList(), "Id", "Nom");
+            return View();
+        }
+
         [HttpGet("articles")]
         public IActionResult GetArticles()
         {
