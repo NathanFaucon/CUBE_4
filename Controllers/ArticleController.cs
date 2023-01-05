@@ -31,11 +31,20 @@ namespace Cube_4.Controllers
             return View();
         }
 
-        public IActionResult Edit()
+        public IActionResult Edit(int id)
         {
+            Article Article = GetArticleById(id);
             ViewBag.Famille = new SelectList(context.Familles.ToList(), "Id", "Nom");
             ViewBag.Fournisseur = new SelectList(context.Fournisseurs.ToList(), "Id", "Nom");
-            return View();
+            return View(Article);
+        }
+
+        public IActionResult Details(int id)
+        {
+            Article Article = GetArticleById(id);
+            ViewBag.Famille = new SelectList(context.Familles.ToList(), "Id", "Nom");
+            ViewBag.Fournisseur = new SelectList(context.Fournisseurs.ToList(), "Id", "Nom");
+            return View(Article);
         }
 
         [HttpGet("articles")]
@@ -138,7 +147,7 @@ namespace Cube_4.Controllers
             }
         }
 
-        [HttpPatch("articles")]
+        
         public IActionResult EditArticle(ArticleDTO newInfos)
         {
             Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == newInfos.Id);
@@ -149,32 +158,42 @@ namespace Cube_4.Controllers
                 findArticle.Prix = newInfos.Prix;
                 findArticle.Famille = newInfos.Famille;
                 findArticle.Fournisseur = newInfos.Fournisseur;
-                if (newInfos.Fournisseur.Nom == "")
-                {
-                    if (newInfos.Fournisseur.Id != 0)
-                    {
-                        Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == newInfos.Fournisseur.Id);
+                
+                Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == newInfos.Fournisseur.Id);
 
-                        if (findFournisseur == null)
-                        {
-                            return NotFound(new
-                            {
-                                Message = "Aucun fournisseur trouvé avec cet ID !"
-                            });
-                        }
-                        else
-                        {
-                            findArticle.Fournisseur = findFournisseur;
-                        }
-                    }
+                if (findFournisseur == null)
+                {
+                    return NotFound(new
+                    {
+                        Message = "Aucun fournisseur trouvé avec cet ID !"
+                    });
                 }
+                else
+                {
+                    findArticle.Fournisseur = findFournisseur;
+                }
+
+                Famille? findFamille = context.Familles.FirstOrDefault(x => x.Id == newInfos.Famille.Id);
+
+                if (findFamille == null)
+                {
+                    return NotFound(new
+                    {
+                        Message = "Aucune famille trouvée avec cet ID !"
+                    });
+                }
+                else
+                {
+                    findArticle.Famille = findFamille;
+                }
+
                 context.Articles.Update(findArticle);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "L'article a bien été modifié !"
-                    });
+                    List<Article> list = context.Articles.ToList();
+                    ViewBag.Famille = new SelectList(context.Familles.ToList(), "Id", "Nom");
+                    ViewBag.Fournisseur = new SelectList(context.Fournisseurs.ToList(), "Id", "Nom");
+                    return View("Index", list);
                 }
                 else
                 {
@@ -192,10 +211,10 @@ namespace Cube_4.Controllers
                 });
             }
         }
-        [HttpDelete("articles/{articleId}")]
-        public IActionResult DeleteArticle(int articleId)
+
+        public IActionResult DeleteArticle(int id)
         {
-            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == articleId);
+            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == id);
 
             if (findArticle == null)
             {
@@ -209,10 +228,10 @@ namespace Cube_4.Controllers
                 context.Articles.Remove(findArticle);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "L'article a bien été supprimé",
-                    });
+                    List<Article> list = context.Articles.ToList();
+                    ViewBag.Famille = new SelectList(context.Familles.ToList(), "Id", "Nom");
+                    ViewBag.Fournisseur = new SelectList(context.Fournisseurs.ToList(), "Id", "Nom");
+                    return View("Index", list);
                 }
                 else
                 {
@@ -222,6 +241,10 @@ namespace Cube_4.Controllers
                     });
                 }
             }
+        }
+        public Article GetArticleById(int articleId)
+        {
+            return context.Articles.FirstOrDefault(article => article.Id == articleId);
         }
     }
 }
