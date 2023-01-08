@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cube_4.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class FournisseurController : ControllerBase
+
+    public class FournisseurController : Controller
     {
         private readonly ApplicationDbContext context;
 
@@ -16,6 +15,22 @@ namespace Cube_4.Controllers
             this.context = context;
         }
 
+        public IActionResult Index()
+        {
+            List<Fournisseur> Fournisseurs = context.Fournisseurs.ToList();
+            return View(Fournisseurs);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        public IActionResult Edit(int id)
+        {
+            Fournisseur fournisseur = GetFournisseurById(id);
+            return View(fournisseur);
+        }
 
         [HttpGet("fournisseurs")]
         public IActionResult GetFournisseurs()
@@ -40,29 +55,11 @@ namespace Cube_4.Controllers
             }
         }
 
-        [HttpGet("fournisseurs/{fournisseurId}")]
-        public IActionResult GetFournisseurById(int fournisseurId)
+        public Fournisseur GetFournisseurById(int fournisseurId)
         {
-            Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == fournisseurId);
-
-            if (findFournisseur == null)
-            {
-                return NotFound(new
-                {
-                    Message = "Aucun fournisseur trouvé avec cet ID !"
-                });
-            }
-            else
-            {
-                return Ok(new
-                {
-                    Message = "Fournisseur trouvé !",
-                    Article = new FournisseurDTO() { Id = findFournisseur.Id, Nom = findFournisseur.Nom}
-                });
-            }
+            return context.Fournisseurs.FirstOrDefault(fournisseur => fournisseur.Id == fournisseurId);
         }
 
-        [HttpPost("fournisseurs")]
         public IActionResult add_fournisseurs(FournisseurDTO newFournisseur)
         {
             Fournisseur addFournisseur= new Fournisseur()
@@ -87,7 +84,6 @@ namespace Cube_4.Controllers
             }
         }
 
-        [HttpPatch("fournisseurs")]
         public IActionResult EditFournisseur(FournisseurDTO newInfos)
         {
             Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == newInfos.Id);
@@ -99,10 +95,8 @@ namespace Cube_4.Controllers
                 context.Fournisseurs.Update(findFournisseur);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "Le fournisseur a bien été modifié !"
-                    });
+                    List<Fournisseur> Fournisseurs = context.Fournisseurs.ToList();
+                    return View("Index", Fournisseurs);
                 }
                 else
                 {
@@ -120,10 +114,10 @@ namespace Cube_4.Controllers
                 });
             }
         }
-        [HttpDelete("fournisseurs/{fournisseurId}")]
-        public IActionResult DeleteFournisseur(int fournisseurId)
+
+        public IActionResult DeleteFournisseur(int Id)
         {
-            Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == fournisseurId);
+            Fournisseur? findFournisseur = context.Fournisseurs.FirstOrDefault(x => x.Id == Id);
 
             if (findFournisseur == null)
             {
@@ -137,10 +131,8 @@ namespace Cube_4.Controllers
                 context.Fournisseurs.Remove(findFournisseur);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "Le fournisseur a bien été supprimé",
-                    });
+                    List<Fournisseur> Fournisseurs = context.Fournisseurs.ToList();
+                    return View("Index", Fournisseurs);
                 }
                 else
                 {

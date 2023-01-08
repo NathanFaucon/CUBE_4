@@ -5,15 +5,31 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Cube_4.Controllers
 {
-    [Route("api")]
-    [ApiController]
-    public class FamilleController : ControllerBase
+
+    public class FamilleController : Controller
     {
         private readonly ApplicationDbContext context;
 
         public FamilleController(ApplicationDbContext context)
         {
             this.context = context;
+        }
+
+        public IActionResult Index()
+        {
+            List<Famille> list = context.Familles.ToList();
+            return View(list);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        public IActionResult Edit(int id)
+        {
+            Famille famille = GetFamilleById(id);
+            return View(famille);
         }
 
         [HttpGet("familles")]
@@ -39,26 +55,9 @@ namespace Cube_4.Controllers
             }
         }
 
-        [HttpGet("familles/{familleId}")]
-        public IActionResult GetFamilleById(int familleId)
+        public Famille GetFamilleById(int familleId)
         {
-            Famille? findFamille = context.Familles.FirstOrDefault(x => x.Id == familleId);
-
-            if (findFamille == null)
-            {
-                return NotFound(new
-                {
-                    Message = "Aucune famille trouvé avec cet ID !"
-                });
-            }
-            else
-            {
-                return Ok(new
-                {
-                    Message = "Famille trouvée !",
-                    Famille = new FamilleDTO() { Id = findFamille.Id, Nom = findFamille.Nom }
-                });
-            }
+            return context.Familles.FirstOrDefault(famille => famille.Id == familleId);
         }
 
         [HttpPost("familles")]
@@ -72,11 +71,8 @@ namespace Cube_4.Controllers
             context.Familles.Add(addFamille);
             if (context.SaveChanges() > 0)
             {
-                return Ok(new
-                {
-                    Message = "La famille a été ajouté avec succès!",
-                    FamilleId = addFamille.Id
-                });
+                List<Famille> Familles = context.Familles.ToList();
+                return View("Index",Familles);
             }
             else
             {
@@ -87,7 +83,7 @@ namespace Cube_4.Controllers
             }
         }
 
-        [HttpPatch("familles")]
+        
         public IActionResult EditFamille(FamilleDTO newInfos)
         {
             Famille? findFamille = context.Familles.FirstOrDefault(x => x.Id == newInfos.Id);
@@ -99,10 +95,8 @@ namespace Cube_4.Controllers
                 context.Familles.Update(findFamille);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "La famille a bien été modifié !"
-                    });
+                    List<Famille> Familles = context.Familles.ToList();
+                    return View("Index", Familles);
                 }
                 else
                 {
@@ -116,15 +110,15 @@ namespace Cube_4.Controllers
             {
                 return NotFound(new
                 {
-                    Message = "Aucune famille n'a été trouvé avec cet ID !"
+                    Message = "Aucune famille n'a été trouvée avec cet ID !"
                 });
             }
         }
 
-        [HttpDelete("familles/{familleId}")]
-        public IActionResult DeleteFamille(int familleId)
+        
+        public IActionResult DeleteFamille(int Id)
         {
-            Famille? findFamille = context.Familles.FirstOrDefault(x => x.Id == familleId);
+            Famille? findFamille = context.Familles.FirstOrDefault(x => x.Id == Id);
 
             if (findFamille == null)
             {
@@ -138,10 +132,8 @@ namespace Cube_4.Controllers
                 context.Familles.Remove(findFamille);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "La famille a bien été supprimé",
-                    });
+                    List<Famille> Familles = context.Familles.ToList();
+                    return View("Index", Familles);
                 }
                 else
                 {
@@ -152,5 +144,7 @@ namespace Cube_4.Controllers
                 }
             }
         }
+
+        
     }
 }
