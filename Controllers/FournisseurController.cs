@@ -26,6 +26,12 @@ namespace Cube_4.Controllers
             return View();
         }
 
+        public IActionResult Details(int id)
+        {
+            Fournisseur fournisseur = GetFournisseurById(id);
+            return View(fournisseur);
+        }
+
         public IActionResult Edit(int id)
         {
             Fournisseur fournisseur = GetFournisseurById(id);

@@ -32,6 +32,12 @@ namespace Cube_4.Controllers
             return View(famille);
         }
 
+        public IActionResult Details(int id)
+        {
+            Famille Famille = GetFamilleById(id);
+            return View(Famille);
+        }
+
         [HttpGet("familles")]
         public IActionResult GetFamilles()
         {
