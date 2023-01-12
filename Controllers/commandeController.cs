@@ -222,10 +222,10 @@ namespace Cube_4.Controllers
                 });
             }
         }
-        [HttpDelete("commande/{commandeId}")]
-        public IActionResult DeleteCommand(int commandeId)
+        
+        public IActionResult DeleteCommand(int Id)
         {
-            Commande? findCommand = context.Commandes.FirstOrDefault(x => x.Id == commandeId);
+            Commande? findCommand = context.Commandes.FirstOrDefault(x => x.Id == Id);
 
             if (findCommand == null)
             {
@@ -239,10 +239,10 @@ namespace Cube_4.Controllers
                 context.Commandes.Remove(findCommand);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "La commande a bien été supprimé",
-                    });
+                    List<Commande> Commandes = context.Commandes.ToList();
+                    ViewBag.User = new SelectList(context.Users.ToList(), "Id", "Email");
+                    ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                    return View("Index", Commandes);
                 } else
                 {
                     return BadRequest(new

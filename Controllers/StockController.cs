@@ -30,8 +30,9 @@ namespace Cube_4.Controllers
 
         public IActionResult Edit(int id)
         {
-            //Famille famille = GetFamilleById(id);
-            return View();
+            ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+            Stock editStock = getStockById(id);
+            return View(editStock);
         }
 
         public IActionResult GetStock()
@@ -56,7 +57,10 @@ namespace Cube_4.Controllers
             }
         }
 
-
+        public Stock getStockById(int id)
+        {
+            return context.Stocks.FirstOrDefault(stock => stock.Id == id);
+        }
         public IActionResult GetStockById(int articleId)
         {
             Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
@@ -79,7 +83,7 @@ namespace Cube_4.Controllers
         }
         
         [HttpPost("stock")]
-        public IActionResult AddStock(StockDTO newStock, int Quantite)
+        public IActionResult AddStock(StockDTO newStock)
         {
             Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == newStock.Article.Id);
             
@@ -92,7 +96,7 @@ namespace Cube_4.Controllers
             }
             Stock addStock = new Stock()
             {
-                Quantite = Quantite,
+                Quantite = newStock.Quantite,
                 ArticleId = newStock.Article.Id
             };
             context.Stocks.Add(addStock);
@@ -111,21 +115,19 @@ namespace Cube_4.Controllers
             }
         }
         
-        [HttpPatch("stock")]
-        public IActionResult EditStock(int articleId, int newQuantite)
+        public IActionResult EditStock(StockDTO editStock)
         {
-            Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
+            Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == editStock.Article.Id);
 
             if (findStock != null)
             {
-                findStock.Quantite = newQuantite;
+                findStock.Quantite = editStock.Quantite;
                 context.Stocks.Update(findStock);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "Le stock a bien été modifié !"
-                    });
+                    List<Stock> Stocks = context.Stocks.ToList();
+                    ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                    return View("Index", Stocks);
                 }
                 else
                 {

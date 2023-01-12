@@ -131,6 +131,8 @@ namespace Cube_4.Controllers
                 addArticle.Famille = findFamille;
             }
             context.Articles.Add(addArticle);
+            Stock addStock = new Stock() { Article = addArticle, Quantite = 0 };
+            context.Stocks.Add(addStock);
             if (context.SaveChanges() > 0)
             {
                 List<Article> list = context.Articles.ToList();
@@ -215,8 +217,8 @@ namespace Cube_4.Controllers
         public IActionResult DeleteArticle(int id)
         {
             Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == id);
-
-            if (findArticle == null)
+            Stock? findStock = context.Stocks.FirstOrDefault(x => x.Article.Id == id);
+            if (findArticle == null || findStock == null)
             {
                 return NotFound(new
                 {
@@ -225,6 +227,7 @@ namespace Cube_4.Controllers
             }
             else
             {
+                context.Stocks.Remove(findStock);
                 context.Articles.Remove(findArticle);
                 if (context.SaveChanges() > 0)
                 {
