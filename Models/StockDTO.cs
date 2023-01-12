@@ -10,6 +10,6 @@ namespace Cube_4.models
         public int Quantite { get; set; }
 
         [Required]
-        public int ArticleId { get; set; }
+        public Article Article { get; set; }
     }
 }

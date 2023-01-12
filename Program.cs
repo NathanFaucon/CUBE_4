@@ -6,9 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 //builder.Services.AddEndpointsApiExplorer();
-options.UseMySql(builder.Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 31))));
+//options.UseMySql(builder.Configuration.GetConnectionString("Default"), new MySqlServerVersion(new Version(8, 0, 31))));
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

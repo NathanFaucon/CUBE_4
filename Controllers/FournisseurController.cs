@@ -75,11 +75,8 @@ namespace Cube_4.Controllers
             context.Fournisseurs.Add(addFournisseur);
             if (context.SaveChanges() > 0)
             {
-                return Ok(new
-                {
-                    Message = "Le Fournisseur a été ajouté avec succès!",
-                    FournisseurId = addFournisseur.Id
-                });
+                List<Fournisseur> Fournisseurs = context.Fournisseurs.ToList();
+                return View("Index", Fournisseurs);
             }
             else
             {

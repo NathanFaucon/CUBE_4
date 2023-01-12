@@ -2,21 +2,41 @@ using Cube_4.Datas;
 using Cube_4.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Cube_4.Controllers
 {
-    [Route("api")]
-    [ApiController]
-    public class CommandController : ControllerBase
+    public class CommandeController : Controller
     {
         private readonly ApplicationDbContext context;
 
-        public CommandController(ApplicationDbContext context)
+        public CommandeController(ApplicationDbContext context)
         {
             this.context = context;
         }
 
-        [HttpGet("commande")]
+        public IActionResult Index()
+        {
+            List<Commande> list = context.Commandes.ToList();
+            ViewBag.User = new SelectList(context.Users.ToList(), "Id", "Email");
+            ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+            return View(list);
+        }
+
+        public IActionResult Create()
+        {
+            ViewBag.User = new SelectList(context.Users.ToList(), "Id", "Email");
+            ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+            return View();
+        }
+
+        public IActionResult Edit(int id)
+        {
+            //Famille famille = GetFamilleById(id);
+            return View();
+        }
+
+        
         public IActionResult GetCommande()
         {
             List<Commande> myCommands = context.Commandes.ToList();
@@ -38,7 +58,7 @@ namespace Cube_4.Controllers
             }
         }
         
-        [HttpGet("commande/{commandeId}")] 
+        
         public IActionResult GetCommandById(int commandeId)
         {
             Commande? findCommand = context.Commandes.FirstOrDefault(x => x.Id == commandeId);
@@ -60,10 +80,10 @@ namespace Cube_4.Controllers
         }
 
         [HttpPost("commande")]
-        public IActionResult AddCommand(CommandeDTO newCommand, int userId, int articleId, int quantite, bool isFournisseur)
+        public IActionResult AddCommand(CommandeDTO newCommand, int quantite, bool isFournisseur)
         {
-            User? findUser = context.Users.FirstOrDefault(x => x.Id == userId);
-            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == articleId);
+            User? findUser = context.Users.FirstOrDefault(x => x.Id == newCommand.User.Id);
+            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == newCommand.Article.Id);
 
             if (findUser == null || findArticle == null)
             {
@@ -81,7 +101,7 @@ namespace Cube_4.Controllers
                     Article = findArticle,
                     isFournisseur = true
                 };
-                Stock? findStockFournisseur = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
+                Stock? findStockFournisseur = context.Stocks.FirstOrDefault(x => x.ArticleId == newCommand.Article.Id);
                 if (findStockFournisseur == null)
                 {
                     return NotFound(new
@@ -94,11 +114,10 @@ namespace Cube_4.Controllers
                 context.Stocks.Update(findStockFournisseur);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "La commande a été ajouté avec succès!",
-                        CommandeId = addCommandFournisseur.Id
-                    });
+                    List<Commande> Commandes = context.Commandes.ToList();
+                    ViewBag.User = new SelectList(context.Users.ToList(), "Id", "Email");
+                    ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                    return View("Index", Commandes);
                 }
                 else
                 {
@@ -118,7 +137,7 @@ namespace Cube_4.Controllers
                     Article = findArticle,
                     isFournisseur = false
                 };
-                Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
+                Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == newCommand.Article.Id);
                 if (findStock == null)
                 {
                     return NotFound(new
@@ -137,7 +156,7 @@ namespace Cube_4.Controllers
                         Article = findArticle,
                         isFournisseur = true
                     };
-                    Stock? findStockFournisseur = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
+                    Stock? findStockFournisseur = context.Stocks.FirstOrDefault(x => x.ArticleId == newCommand.Article.Id);
                     if (findStockFournisseur == null)
                     {
                         return NotFound(new
@@ -152,11 +171,10 @@ namespace Cube_4.Controllers
                 context.Stocks.Update(findStock);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "La commande a été ajouté avec succès!",
-                        CommandeId = addCommand.Id
-                    });
+                    List<Commande> Commandes = context.Commandes.ToList();
+                    ViewBag.User = new SelectList(context.Users.ToList(), "Id", "Email");
+                    ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                    return View("Index", Commandes);
                 }
                 else
                 {

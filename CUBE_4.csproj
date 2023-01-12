@@ -28,4 +28,8 @@
   <ItemGroup>
     <None Remove="Pomelo.EntityFrameworkCore.MySql" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MigrationBackup\" />
+  </ItemGroup>
 </Project>

@@ -2,12 +2,11 @@
 using Cube_4.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Cube_4.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class StockController : ControllerBase
+    public class StockController : Controller
     {
         private readonly ApplicationDbContext context;
 
@@ -16,7 +15,25 @@ namespace Cube_4.Controllers
             this.context = context;
         }
 
-        [HttpGet("stock")]
+        public IActionResult Index()
+        {
+            List<Stock> list = context.Stocks.ToList();
+            ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+            return View(list);
+        }
+
+        public IActionResult Create()
+        {
+            ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+            return View();
+        }
+
+        public IActionResult Edit(int id)
+        {
+            //Famille famille = GetFamilleById(id);
+            return View();
+        }
+
         public IActionResult GetStock()
         {
             List<Stock> myStock = context.Stocks.ToList();
@@ -40,7 +57,6 @@ namespace Cube_4.Controllers
         }
 
 
-        [HttpGet("stock/{articleId}")]
         public IActionResult GetStockById(int articleId)
         {
             Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
@@ -57,15 +73,15 @@ namespace Cube_4.Controllers
                 return Ok(new
                 {
                     Message = "Article dans le stock trouvé !",
-                    Article = new StockDTO() { Id = findStock.Id, ArticleId = findStock.ArticleId, Quantite = findStock.Quantite }
+                    //Article = new StockDTO() { Id = findStock.Id, ArticleId = findStock.Article.Id, Quantite = findStock.Quantite }
                 });
             }
         }
         
         [HttpPost("stock")]
-        public IActionResult AddStock(StockDTO newStock, int articleId, int Quantite)
+        public IActionResult AddStock(StockDTO newStock, int Quantite)
         {
-            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == articleId);
+            Article? findArticle = context.Articles.FirstOrDefault(x => x.Id == newStock.Article.Id);
             
             if (findArticle == null)
             {
@@ -77,16 +93,14 @@ namespace Cube_4.Controllers
             Stock addStock = new Stock()
             {
                 Quantite = Quantite,
-                ArticleId = articleId
+                ArticleId = newStock.Article.Id
             };
             context.Stocks.Add(addStock);
             if (context.SaveChanges() > 0)
             {
-                return Ok(new
-                {
-                    Message = "L'article a été ajouté au stock avec succès!",
-                    StockId = addStock.Id
-                });
+                List<Stock> Stocks = context.Stocks.ToList();
+                ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                return View("Index", Stocks);
             }
             else
             {
@@ -129,11 +143,10 @@ namespace Cube_4.Controllers
                 });
             }
         }
-        
-        [HttpDelete("stock/{articleId}")]
-        public IActionResult DeleteStock(int articleId)
+       
+        public IActionResult DeleteStock(int Id)
         {
-            Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == articleId);
+            Stock? findStock = context.Stocks.FirstOrDefault(x => x.ArticleId == Id);
 
             if (findStock == null)
             {
@@ -147,10 +160,9 @@ namespace Cube_4.Controllers
                 context.Stocks.Remove(findStock);
                 if (context.SaveChanges() > 0)
                 {
-                    return Ok(new
-                    {
-                        Message = "L'article a bien été enlevé du stock",
-                    });
+                    List<Stock> Stocks = context.Stocks.ToList();
+                    ViewBag.Article = new SelectList(context.Articles.ToList(), "Id", "Libelle");
+                    return View("Index", Stocks);
                 }
                 else
                 {
